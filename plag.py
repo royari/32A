@@ -1,3 +1,17 @@
+#%%
+""" 
+cluster same submissions
+
+Before running this script:
+
+1. export the submissions from gradescope
+2. unzip and directory and rename it to `submissions`
+3. export the grades from gradescope
+3. delete all the columns except first name, last name, submission_id
+4. save the file as 'HW3_ID.csv'
+5. run this script
+"""
+
 import os
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -11,6 +25,20 @@ class SameCode:
 
 
 CLUSTER_THRESH = 2
+
+def print_init_message():
+    msg = """\ 
+    ######################################################################
+    1. Export the submissions from gradescope
+    2. Unzip and directory and rename it to `submissions`
+    3. Export the grades from gradescope
+    3. Delete all the columns except first name, last name, submission_id
+    4. Save the file as 'HW3_ID.csv'
+    5. Run this script
+    ######################################################################
+    """
+    print(msg)
+
 
 
 def create_submission_name_map(metadata_file: str = 'HW3_ID.csv') -> dict:
@@ -33,17 +61,16 @@ def create_submission_name_map(metadata_file: str = 'HW3_ID.csv') -> dict:
 
     return data_dict
     
-def _lstrip_lines(lines: str):
+def _tstrip_lines(lines: str, char = "#"):
     """
-    - Gets rid of all the initial lines that starts with # 
+    - Gets rid of all the initial lines (lines from the top) that starts with # 
     - Once code line starts, it does not strip any more lines
     """
-    new_lines = []
     idx = 0
     lines_list = lines.strip().split("\n")
     for line in lines_list:
         
-        if line.strip().startswith("#"):
+        if line.strip().startswith(char) or line.strip() == "":
             idx += 1
         else:
             break
@@ -74,8 +101,7 @@ def create_same_code_clusters() -> list[SameCode]:
             try:
                 with open(file_path) as file:
                     file_str = file.read().strip()
-                    file_str = _lstrip_lines(file_str)
-                    print(f"{file_str=}")
+                    file_str = _tstrip_lines(file_str) # comment this line if top strip not required
                     if file_str not in cluster_dict:
                         same_code_obj = SameCode(code=file_str, file_name=file_name)
                         cluster_dict[file_str] = same_code_obj
@@ -106,6 +132,7 @@ def filter_same_code_cluster_and_format_lines(same_code_cluster: list[SameCode])
     return lines
 
 def main():
+    print_init_message()
     same_code_cluster : list[SameCode] = create_same_code_clusters()
     lines : list = filter_same_code_cluster_and_format_lines(same_code_cluster)
     outfile = "output.csv"
@@ -116,6 +143,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
+# %%
