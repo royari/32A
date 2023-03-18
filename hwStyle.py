@@ -9,10 +9,9 @@ Before running this script:
 1. export the submissions from gradescope
 2. unzip and directory and rename it to `submissions`
 3. export the grades from gradescope
-3. delete all the columns except first name, last name, submission_id
-4. save the file as 'HW4_ID.csv' or equivalent
-5. Updtate the varibles in script
-5. run this script
+4. save the grades file as 'HW4.csv' or equivalent
+5. Updtate the varibles in script (csv file name, hw python files)
+6. run this script
 """
 #%%
 import os 
@@ -21,8 +20,8 @@ from shutil import copyfile
  
 # Function to rename multiple files 
 def main(): 
-    i = 0
-    infile = open('HW4_ID.csv')
+
+    infile = open('HW5.csv') # update this for every file
     line = infile.readline()
     data_dict = {}
     for line in infile:
@@ -31,11 +30,17 @@ def main():
         first_name = data_list[0]
         last_name = data_list[1]
         name = first_name + " " + last_name
-        ID = data_list[2]
+        status = data_list[7]
+        if status.lower() == "missing":
+            continue
+        ID = data_list[8]
         data_dict[ID] = name
         
+    if not os.path.exists("./result"):
+        os.makedirs("result")
+        print("created a new directory: result")
     # Update this list with all the files names of the hw
-    files = ["parrot.py", "password.py", "phone.py", "extract.py", "translate.py", "cat.py", "cash.py", "cash2.py", "check.py"]
+    files = ["read_temp_file.py", "temp_list.py", "first_ave.py", "moving_ave.py", "moving_ave_csv.py", "plot_moving_ave.py"]
     for pathname in os.listdir("./submissions"):
         if pathname == '.DS_Store':
             continue
