@@ -11,7 +11,7 @@ Before running this script:
 4. save the file as 'HW3_ID.csv'
 5. run this script
 """
-
+#%%
 import os
 import re
 from collections import defaultdict
@@ -51,7 +51,7 @@ def print_init_message():
 
 
 
-def create_submission_name_map(metadata_file: str = 'HW3_ID.csv') -> dict:
+def create_submission_name_map(metadata_file: str = 'HW3.csv') -> dict:
     """
     Creates a map of submission_id and student name from submission metadata file
     """
@@ -63,10 +63,13 @@ def create_submission_name_map(metadata_file: str = 'HW3_ID.csv') -> dict:
         for line in infile:
             line = line.strip()
             data_list = line.split(',')
+            status = data_list[7]
+            if status.lower() == "missing":
+                continue
+            ID = data_list[8]
             first_name = data_list[0]
             last_name = data_list[1]
             name = first_name + " " + last_name
-            ID = data_list[2]
             data_dict[ID] = name
 
     return data_dict
@@ -87,13 +90,13 @@ def search_file(file_str: str) -> tuple[bool]:
 
 
 
-def create_submission_objects() -> list[CodeSubmission]:
+def create_submission_objects(hw_name: str) -> list[CodeSubmission]:
     """
     Parses through all the code files and looks for the search string
     """
 
     submissions : list[CodeSubmission] = []
-    data_dict = create_submission_name_map()
+    data_dict = create_submission_name_map(hw_name+".csv")
     submissions_directory = "./submissions"
     for pathname in os.listdir(submissions_directory):
         if pathname == '.DS_Store' or pathname == 'submission_metadata.yml':
@@ -107,7 +110,7 @@ def create_submission_objects() -> list[CodeSubmission]:
             file_path = os.path.join(submissions_directory,pathname,submission_file)
 
             try:
-                with open(file_path) as file:
+                with open(file_path, encoding="utf8", errors='ignore') as file:
                     file_str = file.read().strip()
 
                     submission_obj : CodeSubmission = CodeSubmission(code=file_str, file_name=file_name, student=student_name)
@@ -130,12 +133,12 @@ def filter_guilty_submissions(subs: list[CodeSubmission]) -> list[str]:
 
 def main():
     print_init_message()
-
-    submissions_obj_list = create_submission_objects()
+    hw_name = "HW5"
+    submissions_obj_list = create_submission_objects(hw_name)
     lines = filter_guilty_submissions(submissions_obj_list)
 
 
-    outfile = "guilty.csv"
+    outfile = f"{hw_name}imports.csv"
     with open(outfile, "w") as fobj:
         fobj.write("student_name,file_name,imports,__name__=='__main__'\n")
         fobj.writelines(lines)
@@ -143,3 +146,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# %%
